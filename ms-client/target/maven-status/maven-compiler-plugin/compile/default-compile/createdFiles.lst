@@ -1,0 +1,5 @@
+br\com\mf\service\ClientService.class
+br\com\mf\model\Client.class
+br\com\mf\config\MSClientConfig.class
+br\com\mf\controller\ClientController.class
+br\com\mf\repository\ClientRepository.class
