@@ -1,0 +1,5 @@
+CREATE TABLE deadline (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    client BIGINT NOT NULL,
+    deadline BIGINT NOT NULL
+);
