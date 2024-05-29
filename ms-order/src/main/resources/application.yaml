@@ -1,0 +1,109 @@
+server:
+    port: 8087  # Define a porta na qual o servidor está escutando
+
+external:
+    service:
+        base-url: http://localhost:8086  # Define a URL base para o serviço externo
+
+resilience4j.circuitbreaker:
+    instances:
+        backendA:
+            registerHealthIndicator: true  # Registra um indicador de saúde para o Circuit Breaker
+            slidingWindowSize: 5  # Janela deslizante de 10 chamadas
+            failureRateThreshold: 1  # 100% de falhas necessárias para abrir o circuito
+        backendB:
+            registerHealthIndicator: true  # Registra um indicador de saúde para o Circuit Breaker
+            slidingWindowSize: 10  # Janela deslizante de 10 chamadas
+            permittedNumberOfCallsInHalfOpenState: 3  # Número permitido de chamadas no estado meio-aberto
+            slidingWindowType: TIME_BASED  # Tipo de janela baseada em tempo
+            minimumNumberOfCalls: 3  # Mínimo de 3 chamadas para calcular a taxa de falhas
+            waitDurationInOpenState: 50s  # Duração de espera no estado aberto: 50 segundos
+            failureRateThreshold: 50  # 50% de falhas necessárias para abrir o circuito
+            eventConsumerBufferSize: 10  # Tamanho do buffer do consumidor de eventos
+        backendC:
+            registerHealthIndicator: true  # Registra um indicador de saúde para o Circuit Breaker
+            slidingWindowSize: 3  # Janela deslizante de 10 chamadas
+            permittedNumberOfCallsInHalfOpenState: 5  # Número permitido de chamadas no estado meio-aberto
+            slidingWindowType: COUNT_BASED   # Tipo de janela baseada em contagem de chamadas
+            waitDurationInOpenState: 3600 #tem de espera no estado de aberto. (Vc define o tempo que ele vai ficar aberto sem enviar reguisições e depois desse tempo ele volta a testar novamente)
+            minimumNumberOfCalls: 3  # Mínimo de 3 chamadas para calcular a taxa de falhas
+            failureRateThreshold: 100  # 50% de falhas necessárias para abrir o circuito
+            eventConsumerBufferSize: 100  # Tamanho do buffer do consumidor de eventos   configs:
+        default:
+            recordExceptions:  # Especifica as exceções que devem ser registradas
+                - java.net.ConnectException
+            slidingWindowSize: 100  # Tamanho da janela deslizante: 100 chamadas
+            permittedNumberOfCallsInHalfOpenState: 10  # Número permitido de chamadas no estado meio-aberto: 10
+            waitDurationInOpenState: 10000ms  # Duração de espera no estado aberto: 10000 milissegundos
+            failureRateThreshold: 100  # 100% de falhas necessárias para abrir o circuito
+            eventConsumerBufferSize: 10  # Tamanho do buffer do consumidor de eventos
+            registerHealthIndicator: true  # Registra um indicador de saúde para o Circuit Breaker
+        someShared:
+            slidingWindowSize: 50  # Tamanho da janela deslizante: 50 chamadas
+            permittedNumberOfCallsInHalfOpenState: 10  # Número permitido de chamadas no estado meio-aberto: 10
+
+resilience4j.retry:
+    instances:
+        backendA:
+            maxAttempts: 3  # Número máximo de tentativas: 3
+            waitDuration: 10s  # Duração de espera entre tentativas: 10 segundos
+            enableExponentialBackoff: true  # Habilita o backoff exponencial
+            exponentialBackoffMultiplier: 2  # Multiplicador do backoff exponencial: 2
+        backendB:
+            maxAttempts: 3  # Número máximo de tentativas: 3
+            waitDuration: 10s  # Duração de espera entre tentativas: 10 segundos
+        backendC:
+            maxAttempts: 3  # Número máximo de tentativas: 3
+            waitDuration: 10s  # Duração de espera entre tentativas: 10 segundos
+            enableExponentialBackoff: true  # Habilita o backoff exponencial
+            exponentialBackoffMultiplier: 2  # Multiplicador do backoff exponencial: 2
+resilience4j.bulkhead:
+    instances:
+        backendA:
+            maxConcurrentCalls: 10  # Número máximo de chamadas concorrentes: 10
+        backendB:
+            maxWaitDuration: 10ms  # Duração máxima de espera: 10 milissegundos
+            maxConcurrentCalls: 20  # Número máximo de chamadas concorrentes: 20
+        backendC:
+            maxConcurrentCalls: 10  # Número máximo de chamadas concorrentes: 10
+resilience4j.thread-pool-bulkhead:
+    instances:
+        backendC:
+            maxThreadPoolSize: 1  # Tamanho máximo do pool de threads: 1
+            coreThreadPoolSize: 1  # Tamanho do pool de threads principal: 1
+            queueCapacity: 1  # Capacidade da fila: 1
+            writableStackTraceEnabled: true  # Habilita o rastreamento de pilha gravável
+
+resilience4j.ratelimiter:
+    instances:
+        backendA:
+            limitForPeriod: 10  # Limite para o período: 10
+            limitRefreshPeriod: 1s  # Período de atualização do limite: 1 segundo
+            timeoutDuration: 0  # Duração do tempo limite: 0
+            registerHealthIndicator: true  # Registra um indicador de saúde para o Rate Limiter
+            eventConsumerBufferSize: 100  # Tamanho do buffer do consumidor de eventos
+        backendB:
+            limitForPeriod: 6  # Limite para o período: 6
+            limitRefreshPeriod: 500ms  # Período de atualização do limite: 500 milissegundos
+            timeoutDuration: 3s  # Duração do tempo limite: 3 segundos
+        backendC:
+            limitForPeriod: 10  # Limite para o período: 10
+            limitRefreshPeriod: 1s  # Período de atualização do limite: 1 segundo
+            timeoutDuration: 0  # Duração do tempo limite: 0
+            registerHealthIndicator: true  # Registra um indicador de saúde para o Rate Limiter
+            eventConsumerBufferSize: 100  # Tamanho do buffer do consumidor de eventos
+
+resilience4j.timelimiter:
+    instances:
+        backendA:
+            timeoutDuration: 2s  # Duração do tempo limite: 2 segundos
+            cancelRunningFuture: true  # Cancela a futura execução em andamento se o tempo limite for atingido
+        backendB:
+            timeoutDuration: 1s  # Duração do tempo limite: 1 segundo
+            cancelRunningFuture: false  # Não cancela a futura execução em andamento se o tempo limite for atingido
+        backendC:
+            timeoutDuration: 2s  # Duração do tempo limite: 2 segundos
+            cancelRunningFuture: true  # Cancela a futura execução em andamento se o tempo limite for atingido
+
+management.health.circuitbreakers.enabled: true  # Habilita os indicadores de saúde para os Circuit Breakers
+management.health.ratelimiters.enabled: true  # Habilita os indicadores de saúde para os Rate Limiters
